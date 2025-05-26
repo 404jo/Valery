@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Te Amo - Valery</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+    .valery {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10vw;
+      color: rgba(255, 0, 150, 0.2);
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      pointer-events: none;
+      user-select: none;
+      z-index: 2;
+    }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0);
+      pointer-events: none;
+      transition: background 0.5s ease-in-out;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div class="valery" id="valery">Valery</div>
+  <div class="overlay" id="overlay"></div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const overlay = document.getElementById('overlay');
+    const valery = document.getElementById('valery');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    let fontSize = Math.floor(height / 30);
+    let columnWidth = fontSize * 1.5;
+    let columns = Math.floor(width / columnWidth);
+    let drops = Array(columns).fill(0).map(() => Math.random() * height / fontSize);
+
+    const hearts = [];
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = '#ff00aa';
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = Math.random() < 0.93 ? "TE AMO" : "â™¡";
+        ctx.fillText(text, i * columnWidth, drops[i] * fontSize);
+        drops[i] += 0.8;
+
+        if (drops[i] * fontSize > height || Math.random() > 0.995) {
+          drops[i] = 0;
+        }
+      }
+
+      // Dibujar corazones voladores
+      for (let i = hearts.length - 1; i >= 0; i--) {
+        const heart = hearts[i];
+        ctx.globalAlpha = heart.opacity;
+        ctx.fillStyle = heart.color;
+        ctx.font = `${heart.size}px sans-serif`;
+        ctx.fillText("â™¡", heart.x, heart.y);
+        ctx.globalAlpha = 1;
+
+        heart.y -= heart.speed;
+        heart.opacity -= 0.01;
+
+        if (heart.opacity <= 0) {
+          hearts.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(drawMatrix);
+    }
+
+    drawMatrix();
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      fontSize = Math.floor(height / 30);
+      columnWidth = fontSize * 1.5;
+      columns = Math.floor(width / columnWidth);
+      drops = Array(columns).fill(0).map(() => Math.random() * height / fontSize);
+    });
+
+    function showValery() {
+      valery.style.opacity = 1;
+      overlay.style.background = 'rgba(0, 0, 0, 0.5)';
+
+      setTimeout(() => {
+        valery.style.opacity = 0;
+        overlay.style.background = 'rgba(0, 0, 0, 0)';
+      }, 2000);
+    }
+
+    function spawnHeart(x, y) {
+      hearts.push({
+        x,
+        y,
+        opacity: 1,
+        size: Math.random() * 20 + 20,
+        speed: Math.random() * 1 + 0.5,
+        color: '#ff0066'
+      });
+    }
+
+    let heartInterval = null;
+
+    function startHeartExplosion(e) {
+      showValery();
+      const getCoords = (e) => (e.touches ? e.touches[0] : e);
+      const coords = getCoords(e);
+
+      spawnHeart(coords.clientX, coords.clientY);
+
+      heartInterval = setInterval(() => {
+        const coords = getCoords(e);
+        for (let i = 0; i < 3; i++) {
+          spawnHeart(coords.clientX + (Math.random() * 30 - 15), coords.clientY + (Math.random() * 30 - 15));
+        }
+      }, 100);
+    }
+
+    function stopHeartExplosion() {
+      clearInterval(heartInterval);
+    }
+
+    document.addEventListener('mousedown', startHeartExplosion);
+    document.addEventListener('mouseup', stopHeartExplosion);
+    document.addEventListener('touchstart', startHeartExplosion);
+    document.addEventListener('touchend', stopHeartExplosion);
+  </script>
+</body>
+</html>

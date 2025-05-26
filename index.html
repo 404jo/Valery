@@ -38,13 +38,32 @@
       transition: background 0.5s ease-in-out;
       z-index: 1;
     }
+    .firma {
+      position: absolute;
+      bottom: 10px;
+      right: 20px;
+      color: #ff0099;
+      font-size: 1.5em;
+      font-family: 'Cursive', sans-serif;
+      opacity: 0.6;
+      z-index: 3;
+      animation: float 3s ease-in-out infinite;
+    }
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+    
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
   <div class="valery" id="valery">Valery</div>
   <div class="overlay" id="overlay"></div>
-
+  <div class="firma" id="firma">— Tu Juan</div>
+  
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');

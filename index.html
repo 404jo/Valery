@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" 
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Te Amo - Valery</title>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
@@ -29,10 +28,7 @@
       pointer-events: none;
       user-select: none;
       z-index: 2;
-      text-shadow:
-        0 0 10px rgba(255, 0, 150, 0.5),
-        0 0 20px rgba(255, 0, 150, 0.4),
-        0 0 30px rgba(255, 0, 150, 0.3);
+      text-shadow: 0 0 10px rgba(255, 0, 150, 0.5), 0 0 20px rgba(255, 0, 150, 0.4), 0 0 30px rgba(255, 0, 150, 0.3);
     }
     .overlay {
       position: absolute;
@@ -56,7 +52,6 @@
       z-index: 3;
       animation: float 3s ease-in-out infinite;
     }
-
     @keyframes float {
       0% { transform: translateY(0px); }
       50% { transform: translateY(-5px); }
@@ -85,8 +80,10 @@
     let drops = Array(columns).fill(0).map(() => Math.random() * height / fontSize);
 
     let cursor = { x: 0, y: 0 };
-    
+    let isDrawing = false;
     const hearts = [];
+    let lastHeartTime = 0;
+    const heartDelay = 100;
 
     function drawMatrix() {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
@@ -98,7 +95,6 @@
         const text = Math.random() < 0.93 ? "TE AMO" : "♡";
         ctx.fillText(text, i * columnWidth, drops[i] * fontSize);
         drops[i] += 0.5;
-
         if (drops[i] * fontSize > height || Math.random() > 0.995) {
           drops[i] = 0;
         }
@@ -111,15 +107,12 @@
         ctx.font = `${heart.size}px sans-serif`;
         ctx.fillText("♡", heart.x, heart.y);
         ctx.globalAlpha = 1;
-
         heart.y -= heart.speed;
         heart.opacity -= 0.01;
-
         if (heart.opacity <= 0) {
           hearts.splice(i, 1);
         }
       }
-
       requestAnimationFrame(drawMatrix);
     }
 
@@ -137,7 +130,6 @@
     function showValery() {
       valery.style.opacity = 1;
       overlay.style.background = 'rgba(0, 0, 0, 0.5)';
-
       setTimeout(() => {
         valery.style.opacity = 0;
         overlay.style.background = 'rgba(0, 0, 0, 0)';
@@ -155,40 +147,53 @@
       });
     }
 
-    let heartInterval = null;
-
-    function startHeartExplosion(e) {
-      showValery();
-      for (let i = 0; i < 30; i++) {
-        spawnHeart(cursor.x + (Math.random() * 100 - 50), cursor.y + (Math.random() * 100 - 50));
-      }
-      
-      heartInterval = setInterval(() => {
-        for (let i = 0; i < 3; i++) {
-          spawnHeart(cursor.x + (Math.random() * 30 - 15), cursor.y + (Math.random() * 30 - 15));
+    function createHeartsAtCursor() {
+      const now = Date.now();
+      if (now - lastHeartTime > heartDelay && isDrawing) {
+        for (let i = 0; i < 2; i++) {
+          spawnHeart(
+            cursor.x + (Math.random() * 40 - 20),
+            cursor.y + (Math.random() * 40 - 20)
+          );
         }
-      }, 100);
-    }
-
-    function stopHeartExplosion() {
-      clearInterval(heartInterval);
-    }
-
-    document.addEventListener('mousedown', startHeartExplosion);
-    document.addEventListener('mouseup', stopHeartExplosion);
-    document.addEventListener('touchstart', startHeartExplosion);
-    document.addEventListener('touchend', stopHeartExplosion);
-    document.addEventListener('mousemove', (e) => {
-      cursor.x = e.clientX;
-      cursor.y = e.clientY;
-    });
-
-    document.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) {
-        cursor.x = e.touches[0].clientX;
-        cursor.y = e.touches[0].clientY;
+        lastHeartTime = now;
       }
-    });
+    }
+
+    function handleStart(e) {
+      isDrawing = true;
+      updateCursorPosition(e);
+      showValery();
+      for (let i = 0; i < 5; i++) {
+        spawnHeart(
+          cursor.x + (Math.random() * 60 - 30),
+          cursor.y + (Math.random() * 60 - 30)
+        );
+      }
+    }
+
+    function handleEnd() {
+      isDrawing = false;
+    }
+
+    function updateCursorPosition(e) {
+      const x = e.clientX || (e.touches && e.touches[0].clientX);
+      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      if (x && y) {
+        cursor.x = x;
+        cursor.y = y;
+        createHeartsAtCursor();
+      }
+    }
+
+    document.addEventListener('mousedown', handleStart);
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('mousemove', updateCursorPosition);
+    document.addEventListener('touchstart', handleStart);
+    document.addEventListener('touchend', handleEnd);
+    document.addEventListener('touchmove', updateCursorPosition);
+
+    setInterval(createHeartsAtCursor, heartDelay);
   </script>
 </body>
 </html>

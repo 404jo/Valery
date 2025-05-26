@@ -68,9 +68,9 @@
       ctx.font = `${fontSize}px monospace`;
 
       for (let i = 0; i < drops.length; i++) {
-        const text = Math.random() < 0.93 ? "TE AMO" : "â™¡";
+        const text = Math.random() < 0.93 ? "TE AMO" : "♡";
         ctx.fillText(text, i * columnWidth, drops[i] * fontSize);
-        drops[i] += 0.8;
+        drops[i] += 0.5;
 
         if (drops[i] * fontSize > height || Math.random() > 0.995) {
           drops[i] = 0;
@@ -83,7 +83,7 @@
         ctx.globalAlpha = heart.opacity;
         ctx.fillStyle = heart.color;
         ctx.font = `${heart.size}px sans-serif`;
-        ctx.fillText("â™¡", heart.x, heart.y);
+        ctx.fillText("♡", heart.x, heart.y);
         ctx.globalAlpha = 1;
 
         heart.y -= heart.speed;
